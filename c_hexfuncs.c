@@ -2,30 +2,32 @@
 
 #include <unistd.h> // this is the only system header file you may include!
 #include "hexfuncs.h"
-
-// TODO: add function implementations here
+#include <stdio.h>
 
 // Read up to 16 bytes from standard input into data_buf.
 // Returns the number of characters read.
 long hex_read(char data_buf[])
 {
-  char c[1];
-  long count = 0;
-  //read(STDIN_FILENO, data_buf, 16);
-  while (read(STDIN_FILENO, c, 1) != '\0' && count < 16) // find another way to read input
+  int count = 0;
+  int n = read(STDIN_FILENO, &data_buf[count], 1);
+  count += n;
+  while (n != 0 && count < 16)
   {
-    /* process `c' */
-    data_buf[count] = *c;
+    n = read(STDIN_FILENO, &data_buf[count], 1);
     count++;
   }
-  count++;
   return count;
 }
 
 // Write given nul-terminated string to standard output.
 void hex_write_string(const char s[])
 {
-  write(STDOUT_FILENO, s, 16); //find some other way to write to out
+  int count = 0;
+  while (s[count] != '\0')
+  {
+    count++;
+  }
+  int i = write(STDOUT_FILENO, s, count); //find some other way to write to out
 }
 
 // Format a long value as an offset string consisting of exactly 8
@@ -33,17 +35,19 @@ void hex_write_string(const char s[])
 // have enough room for a string of length 8.
 void hex_format_offset(long offset, char sbuf[])
 {
-  for (long i = 8 - sizeof(offset); i < 8; i++)
+  for (int i = 7; i >= 0; i--)
   {
-    sbuf[i] = 48 + (offset >> (8 - i - 1));
+    sbuf[i] = 48 + (offset % 10);
+    offset = offset / 10;
   }
-  sbuf[sizeof(offset)] = '\0';
+  sbuf[8] = '\0';
 }
 
 // Format a byte value (in the range 0-255) as string consisting
 // of two hex digits.  The string is stored in sbuf.
 void hex_format_byte_as_hex(long byteval, char sbuf[])
 {
+  byteval = byteval & 0X7FFFFFFF;
   int tens = byteval / 16;
   int ones = byteval % 16;
   char first = '0';
@@ -56,7 +60,6 @@ void hex_format_byte_as_hex(long byteval, char sbuf[])
   {
     first = tens + 48;
   }
-
   if (ones >= 10)
   {
     second = ones + 87;
