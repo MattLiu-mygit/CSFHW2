@@ -33,15 +33,11 @@ void hex_write_string(const char s[])
 // have enough room for a string of length 8.
 void hex_format_offset(long offset, char sbuf[])
 {
-  for (int i = 7; i >= 0; i--)
+  for (long i = 8 - sizeof(offset); i < 8; i++)
   {
-    long mod = i > 0 ? 10 : 1;
-    for (int n = i; n > 0; n--)
-    {
-      mod *= 10;
-    }
-    sbuf[i] = offset / mod;
+    sbuf[i] = 48 + (offset >> (8 - i - 1));
   }
+  sbuf[sizeof(offset)] = '\0';
 }
 
 // Format a byte value (in the range 0-255) as string consisting
@@ -71,6 +67,7 @@ void hex_format_byte_as_hex(long byteval, char sbuf[])
   }
   sbuf[0] = first;
   sbuf[1] = second;
+  sbuf[2] = '\0';
 }
 
 // Convert a byte value (in the range 0-255) to a printable character
@@ -79,7 +76,7 @@ void hex_format_byte_as_hex(long byteval, char sbuf[])
 // ASCII code for '.' should be returned.
 long hex_to_printable(long byteval)
 {
-  if (byteval >= 32 || byteval <= 126)
+  if (byteval >= 32 && byteval <= 126)
   {
     return byteval;
   }
