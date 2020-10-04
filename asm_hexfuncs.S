@@ -22,6 +22,26 @@
  *   rsi - The array to which we put the offset hex.
  */
 	hex_format_offset:
+		movq $7, %r8
+		movq $16, %r9
+		movq %rdi, %rax
+		.LTop:
+			cmpq $0, %r8
+			jl .LOut
+			divq %r9 /*mod in rdx, quotient in rax*/
+			movb %dl, %r10b /*then fill in array in reverse order */
+			cmpb $10, %r10b
+			jl .Less_than_ten
+			addb $87, %r10b
+			JMP .LAfter
+			.Less_than_ten:
+				addb $48, %r10b
+			.LAfter:
+				movb %r10b, (%rsi, %r8)
+				subq $1, %r8
+				JMP .LTop
+		.LOut:
+		movb $0, 9(%rsi, %r8)
 		ret
 
 /*
