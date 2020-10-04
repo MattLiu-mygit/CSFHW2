@@ -1,5 +1,9 @@
-// Function prototypes for hexdump functions
-// Do not change these!
+/*
+ * Function prototypes for hexdump functions
+ * CSF Assignment 2
+ * Matthew Liu
+ * mliu78@jhu.edu
+ */
 
 #ifndef HEXFUNCS_H
 #define HEXFUNCS_H
