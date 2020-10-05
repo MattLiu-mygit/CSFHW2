@@ -17,6 +17,7 @@ typedef struct
   char test_data_empty[1];
   char test_data_16_chars[17];
   char test_data_zoom[100];
+  char test_data_with_negatives[50];
 } TestObjs;
 
 // setup function (to create the test fixture)
@@ -27,6 +28,7 @@ TestObjs *setup(void)
   strcpy(objs->test_data_empty, "");
   strcpy(objs->test_data_16_chars, "Greetings my bo");
   strcpy(objs->test_data_zoom, "https://JHUBlueJays.zoom.us/j/92836602907?pwd=S1pzTGU1QUFZZEtHb1hjdFdSTXV1QT09");
+  strcpy(objs->test_data_with_negatives, "we always have three “columns” of output:");
   return objs;
 }
 
@@ -70,7 +72,6 @@ void testFormatOffset(TestObjs *objs)
   hex_format_offset(2L, buf);
   ASSERT(0 == strcmp(buf, "00000002"));
   hex_format_offset(17L, buf);
-  //printf("\nbuf is %s\n", buf);
   ASSERT(0 == strcmp(buf, "00000011"));
   hex_format_offset(4294967295L, buf);
   ASSERT(0 == strcmp(buf, "ffffffff"));
@@ -83,7 +84,6 @@ void testFormatByteAsHex(TestObjs *objs)
   ASSERT(0 == strcmp(buf, "48"));
   memset(buf, 0, sizeof(buf));
   hex_format_byte_as_hex(objs->test_data_1[5], buf);
-  printf("\nbuf is %s\n", buf);
   ASSERT(0 == strcmp(buf, "2c"));
   memset(buf, 0, sizeof(buf));
   hex_format_byte_as_hex(objs->test_data_1[6], buf);
@@ -105,6 +105,12 @@ void testFormatByteAsHex(TestObjs *objs)
   memset(buf, 0, sizeof(buf));
   hex_format_byte_as_hex(255, buf);
   ASSERT(0 == strcmp(buf, "ff"));
+  memset(buf, 0, sizeof(buf));
+  hex_format_byte_as_hex(226, buf);
+  ASSERT(0 == strcmp(buf, "e2"));
+  memset(buf, 0, sizeof(buf));
+  hex_format_byte_as_hex(objs->test_data_with_negatives[21], buf);
+  ASSERT(0 == strcmp(buf, "e2"));
   memset(buf, 0, sizeof(buf));
 }
 
