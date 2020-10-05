@@ -40,6 +40,7 @@ int main(void)
     hex_write_string(toInsert);
     hex_write_string("\n\0");
     count += 16; // Line memory number increases by 16 every time.
+
     n = hex_read(toInsert);
   }
 

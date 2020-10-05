@@ -8,9 +8,39 @@
 	.section .rodata
 
 	.section .text
+		.globl hex_read
+		.globl hex_write_string
 		.globl hex_format_byte_as_hex
 		.globl hex_to_printable
-		.globl hex_format_offset
+		.globl hex_format_offset	
+
+	hex_read:
+		addq $8, %rsp
+		leaq 0(%rdi), %rsi	/*move buf array into corresponding register*/
+		movq $0, %rdi				/*indicate stdin for sys_read*/
+		movq $16, %rdx			/*reads 16 bytes*/
+		movq $0, %rax				/*indicate read system call*/
+		syscall
+		movb $0, (%rax, %rsi)
+		subq $8, %rsp
+		ret
+
+	hex_write_string:
+		leaq 0(%rdi), %rsi	/*move buf array into corresponding register*/
+		movq $1, %rdi				/*indicate stdout for sys_write*/
+		movq $0, %rdx				/*writes until \0*/
+		
+		.LCounting:
+			movb (%rsi, %rdx), %r8b
+			testb %r8b, %r8b
+			je .LCounted
+			incq %rdx
+			JMP .LCounting
+
+		.LCounted:
+			movq $1, %rax				/*indicate read system call*/
+			syscall
+			ret
 
 /*
  * Format a long value as an offset string consisting of exactly 8
@@ -23,23 +53,27 @@
  */
 	hex_format_offset:
 		movq $7, %r8
-		movq $16, %r9
 		movq %rdi, %rax
+
 		.LTop:
 			cmpq $0, %r8
 			jl .LOut
-			divq %r9 /*mod in rdx, quotient in rax*/
-			movb %dl, %r10b /*then fill in array in reverse order */
-			cmpb $10, %r10b
+			movb $15, %r9b
+			andb %al, %r9b 
+			shrq $4, %rax
+			cmpb $10, %r9b
 			jl .Less_than_ten
-			addb $87, %r10b
+			addb $87, %r9b
 			JMP .LAfter
+
 			.Less_than_ten:
-				addb $48, %r10b
+				addb $48, %r9b
+
 			.LAfter:
-				movb %r10b, (%rsi, %r8)
+				movb %r9b, (%rsi, %r8)
 				subq $1, %r8
 				JMP .LTop
+
 		.LOut:
 		movb $0, 9(%rsi, %r8)
 		ret
@@ -54,29 +88,42 @@
  */
 	hex_format_byte_as_hex:
 		movq %rdi, %rax
-		movq $16, %r10
-		divq %r10
-		movb %dl, %r9b
-		movb %al, %r8b
-		cmpb $10, %r8b
+		movb $15, %r9b
+		andb %al, %r9b 
+		shrb $4, %al
+
+		cmpb $0, %al
+		jge .LTestOnes
+		addb $16, %al
+
+		.LTestOnes:
+		cmpb $0, %r9b
+		jge .LAllPositive
+		addb $16, %r9b
+
+		.LAllPositive:
+		cmpb $10, %al
 		jl .Less_than_tens
-			addb $87, %r8b
+			addb $87, %al
 			JMP .To_ones
+
 		.Less_than_tens:
-			addb $48, %r8b
+			addb $48, %al
+
 		.To_ones:
 			cmpb $10, %r9b
 			jl .Less_than_ones
 			addb $87, %r9b
 			JMP .After
+
 		.Less_than_ones:
 			addb $48, %r9b
+
 		.After:
-			movq $1, %rcx
-			movb %r8b, (%rsi)
-			movb %r9b, (%rsi, %rcx)
-			movb $0, 1(%rsi, %rcx)
-		ret
+			movb %al, 0(%rsi)
+			movb %r9b, 1(%rsi)
+			movb $0, 2(%rsi)
+			ret
 
 /*
  * Convert a byte value (in the range 0-255) to a printable character
@@ -88,14 +135,15 @@
  *   rdi - The byte value.
  */
 	hex_to_printable:
-		cmpq $32, %rdi
+		cmpb $32, %dil
 		jl .Not_char
-		cmpq $126, %rdi
+		cmpb $126, %dil
 		jg .Not_char
-		movq %rdi, %rax
+		movb %dil, %al
 		ret
+
 		.Not_char:
-			movq $46, %rax
+			movb $46, %al
 			ret
 
 /* vim:ft=gas:

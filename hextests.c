@@ -70,6 +70,7 @@ void testFormatOffset(TestObjs *objs)
   hex_format_offset(2L, buf);
   ASSERT(0 == strcmp(buf, "00000002"));
   hex_format_offset(17L, buf);
+  //printf("\nbuf is %s\n", buf);
   ASSERT(0 == strcmp(buf, "00000011"));
   hex_format_offset(4294967295L, buf);
   ASSERT(0 == strcmp(buf, "ffffffff"));
@@ -82,6 +83,7 @@ void testFormatByteAsHex(TestObjs *objs)
   ASSERT(0 == strcmp(buf, "48"));
   memset(buf, 0, sizeof(buf));
   hex_format_byte_as_hex(objs->test_data_1[5], buf);
+  printf("\nbuf is %s\n", buf);
   ASSERT(0 == strcmp(buf, "2c"));
   memset(buf, 0, sizeof(buf));
   hex_format_byte_as_hex(objs->test_data_1[6], buf);

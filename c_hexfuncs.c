@@ -7,6 +7,7 @@
 
 #include <unistd.h> // this is the only system header file you may include!
 #include "hexfuncs.h"
+#include <stdio.h>
 
 /*
  * Read up to 16 bytes from standard input into data_buf.
@@ -79,6 +80,40 @@ void hex_format_offset(long offset, char sbuf[])
 }
 
 /*
+ * A helper function that checks and makes an inputed inputed value positive.
+ *
+ * Parameters:
+ *   in - the value we want to check and make positive.
+ */
+int make_positive(int in)
+{
+  if (in < 0)
+  {
+    in += 16;
+  }
+  return in;
+}
+
+/*
+ * A helper function that converts an inputed value to its corresponding ascii character
+ *
+ * Parameters:
+ *   val - the value we want to convert.
+ */
+char convert_to_ascii(int val)
+{
+  if (val >= 10)
+  {
+    val = val + 87;
+  }
+  else
+  {
+    val = val + 48;
+  }
+  return val;
+}
+
+/*
  * Format a byte value (in the range 0-255) as string consisting
  * of two hex digits.  The string is stored in sbuf.
  *
@@ -88,26 +123,14 @@ void hex_format_offset(long offset, char sbuf[])
  */
 void hex_format_byte_as_hex(long byteval, char sbuf[])
 {
-  int tens = byteval / 16;
-  int ones = byteval % 16;
+  int ones = byteval & 15;
+  int tens = byteval >> 4;
+  ones = make_positive(ones);
+  tens = make_positive(tens);
   char first = '0';
   char second = '0';
-  if (tens >= 10)
-  {
-    first = tens + 87;
-  }
-  else
-  {
-    first = tens + 48;
-  }
-  if (ones >= 10)
-  {
-    second = ones + 87;
-  }
-  else
-  {
-    second = ones + 48;
-  }
+  first = convert_to_ascii(tens);
+  second = convert_to_ascii(ones);
   sbuf[0] = first;
   sbuf[1] = second;
   sbuf[2] = '\0';
