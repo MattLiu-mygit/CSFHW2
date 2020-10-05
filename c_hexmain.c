@@ -6,7 +6,6 @@
  */
 
 #include "hexfuncs.h" // this is the only header file which may be included!
-#include <stdio.h>
 
 /*
  * A helper function that writes the first part of the output line.

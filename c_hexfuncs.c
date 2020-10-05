@@ -7,7 +7,6 @@
 
 #include <unistd.h> // this is the only system header file you may include!
 #include "hexfuncs.h"
-#include <stdio.h>
 
 /*
  * Read up to 16 bytes from standard input into data_buf.
@@ -50,6 +49,10 @@ void hex_write_string(const char s[])
     count++;
   }
   int i = write(STDOUT_FILENO, s, count);
+  if (i < 0)
+  {
+    i++;
+  }
 }
 
 /*
